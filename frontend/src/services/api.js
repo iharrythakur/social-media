@@ -2,7 +2,7 @@ import axios from 'axios';
 import { storage } from '../config/firebase';
 import { ref, uploadBytes, getDownloadURL } from 'firebase/storage';
 
-const API_BASE_URL = process.env.REACT_APP_API_URL || 'http://localhost:5000';
+const API_BASE_URL = process.env.REACT_APP_API_URL || 'https://social-media-4-0pb3.onrender.com';
 
 // Create axios instance
 const api = axios.create({
