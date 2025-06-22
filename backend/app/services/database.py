@@ -1,5 +1,6 @@
 import os
 import psycopg2
+import logging
 from psycopg2.extras import RealDictCursor
 from typing import List, Optional, Dict, Any
 from ..models.user import User
@@ -8,13 +9,22 @@ from ..models.post import Post
 
 class DatabaseService:
     def __init__(self):
+        logging.info("Initializing DatabaseService.")
         self.connection_string = os.getenv('DATABASE_URL')
         if not self.connection_string:
+            logging.error("DATABASE_URL environment variable not set.")
             # Fallback to individual environment variables
             self.connection_string = f"postgresql://{os.getenv('DB_USER')}:{os.getenv('DB_PASSWORD')}@{os.getenv('DB_HOST')}:{os.getenv('DB_PORT')}/{os.getenv('DB_NAME')}"
 
     def get_connection(self):
-        return psycopg2.connect(self.connection_string, cursor_factory=RealDictCursor)
+        try:
+            conn = psycopg2.connect(
+                self.connection_string, cursor_factory=RealDictCursor)
+            logging.info("Database connection successful.")
+            return conn
+        except Exception as e:
+            logging.error(f"Database connection failed: {e}")
+            raise
 
     # User operations
     def create_user(self, user: User) -> User:
