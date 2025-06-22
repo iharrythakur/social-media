@@ -59,5 +59,10 @@ def create_app():
     def health_check():
         return {'status': 'healthy', 'message': 'Social Media Platform API is running'}
 
+    # Root endpoint for basic testing
+    @app.route('/')
+    def root():
+        return {'message': 'Social Media Platform API', 'status': 'running'}
+
     logging.info("Flask app creation complete.")
     return app
