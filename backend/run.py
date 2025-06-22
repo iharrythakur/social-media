@@ -1,14 +1,22 @@
+import logging
 from app import create_app
 from app.services.database import db_service
+
+# Configure logging first
+logging.basicConfig(level=logging.INFO,
+                    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
+
+logging.info("=== Starting Social Media Platform Backend ===")
 
 app = create_app()
 
 if __name__ == '__main__':
     # Initialize database tables
     try:
+        logging.info("Starting database initialization...")
         db_service.init_database()
-        print("Database initialized successfully")
+        logging.info("Database initialized successfully")
     except Exception as e:
-        print(f"Database initialization failed: {e}")
+        logging.error(f"Database initialization failed: {e}")
 
     app.run(debug=True, host='0.0.0.0', port=5000)
