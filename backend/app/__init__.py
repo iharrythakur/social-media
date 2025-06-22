@@ -1,4 +1,4 @@
-from flask import Flask
+from flask import Flask, request
 from flask_cors import CORS
 from flask_jwt_extended import JWTManager
 import os
@@ -37,10 +37,18 @@ def create_app():
     allowed_origins = os.getenv('CORS_ORIGINS')
     if not allowed_origins:
         logging.warning(
-            "CORS_ORIGINS environment variable not set. Defaulting to empty list.")
-        allowed_origins = ''
+            "CORS_ORIGINS environment variable not set. Defaulting to localhost:3000 for development.")
+        allowed_origins = 'http://localhost:3000'
 
-    CORS(app, origins=allowed_origins.split(','))
+    # Split multiple origins if provided
+    origins_list = [origin.strip() for origin in allowed_origins.split(',')]
+    logging.info(f"Allowed CORS origins: {origins_list}")
+
+    CORS(app,
+         origins=origins_list,
+         supports_credentials=True,
+         methods=['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+         allow_headers=['Content-Type', 'Authorization', 'X-Requested-With'])
     JWTManager(app)
 
     # Import and register blueprints
@@ -63,6 +71,17 @@ def create_app():
     @app.route('/')
     def root():
         return {'message': 'Social Media Platform API', 'status': 'running'}
+
+    # CORS preflight handler
+    @app.route('/api/<path:path>', methods=['OPTIONS'])
+    def handle_preflight(path):
+        response = app.make_default_options_response()
+        response.headers['Access-Control-Allow-Origin'] = request.headers.get(
+            'Origin', '*')
+        response.headers['Access-Control-Allow-Methods'] = 'GET, POST, PUT, DELETE, OPTIONS'
+        response.headers['Access-Control-Allow-Headers'] = 'Content-Type, Authorization, X-Requested-With'
+        response.headers['Access-Control-Allow-Credentials'] = 'true'
+        return response
 
     logging.info("Flask app creation complete.")
     return app
