@@ -144,36 +144,46 @@ class DatabaseService:
     # Database initialization
     def init_database(self):
         """Create tables if they don't exist"""
-        with self.get_connection() as conn:
-            with conn.cursor() as cur:
-                # Create users table
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS users (
-                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                        firebase_uid VARCHAR(255) UNIQUE NOT NULL,
-                        name VARCHAR(255) NOT NULL,
-                        email VARCHAR(255) UNIQUE NOT NULL,
-                        bio TEXT,
-                        profile_picture_url TEXT,
-                        created_at TIMESTAMP DEFAULT NOW(),
-                        updated_at TIMESTAMP DEFAULT NOW()
-                    )
-                """)
+        logging.info(
+            "Starting database initialization - creating tables if they don't exist.")
+        try:
+            with self.get_connection() as conn:
+                with conn.cursor() as cur:
+                    # Create users table
+                    logging.info("Creating users table...")
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS users (
+                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                            firebase_uid VARCHAR(255) UNIQUE NOT NULL,
+                            name VARCHAR(255) NOT NULL,
+                            email VARCHAR(255) UNIQUE NOT NULL,
+                            bio TEXT,
+                            profile_picture_url TEXT,
+                            created_at TIMESTAMP DEFAULT NOW(),
+                            updated_at TIMESTAMP DEFAULT NOW()
+                        )
+                    """)
 
-                # Create posts table
-                cur.execute("""
-                    CREATE TABLE IF NOT EXISTS posts (
-                        id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
-                        user_id UUID REFERENCES users(id) ON DELETE CASCADE,
-                        content TEXT NOT NULL,
-                        image_url TEXT,
-                        likes_count INTEGER DEFAULT 0,
-                        created_at TIMESTAMP DEFAULT NOW(),
-                        updated_at TIMESTAMP DEFAULT NOW()
-                    )
-                """)
+                    # Create posts table
+                    logging.info("Creating posts table...")
+                    cur.execute("""
+                        CREATE TABLE IF NOT EXISTS posts (
+                            id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
+                            user_id UUID REFERENCES users(id) ON DELETE CASCADE,
+                            content TEXT NOT NULL,
+                            image_url TEXT,
+                            likes_count INTEGER DEFAULT 0,
+                            created_at TIMESTAMP DEFAULT NOW(),
+                            updated_at TIMESTAMP DEFAULT NOW()
+                        )
+                    """)
 
-                conn.commit()
+                    conn.commit()
+                    logging.info(
+                        "Database tables created/verified successfully.")
+        except Exception as e:
+            logging.error(f"Database initialization failed: {e}")
+            raise
 
 
 # Global database service instance
