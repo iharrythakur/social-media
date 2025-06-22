@@ -6,6 +6,8 @@ from app.services.database import db_service
 logging.basicConfig(level=logging.INFO,
                     format='%(asctime)s - %(name)s - %(levelname)s - %(message)s')
 
+logging.info("=== Starting Social Media Platform Backend ===")
+
 app = create_app()
 
 if __name__ == '__main__':
